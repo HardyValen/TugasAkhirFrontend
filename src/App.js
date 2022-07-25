@@ -7,10 +7,11 @@ import SettingsPage from "./pages/settingsPage";
 import { getAPIFromName } from "./constants/APP_FUNCTIONS";
 import { Alert, IconButton, Snackbar } from "@mui/material";
 import { Close } from "@mui/icons-material";
+import APP_CONSTANTS from "./constants/APP_CONSTANTS";
 
 export default function App() {
-  const [videoURL, setVideoURL] = useState(getAPIFromName("video"));
-  const [logURL, setLogURL] = useState(getAPIFromName("log"));
+  const [videoURL, setVideoURL] = useState(getAPIFromName(APP_CONSTANTS.backend, "video"));
+  const [logURL, setLogURL] = useState(getAPIFromName(APP_CONSTANTS.backend, "log"));
   const [snackMessage, setSnackMessage] = useState("");
   const [snackState, setSnackState] = useState(false);
   const [snackSeverity, setSnackSeverity] = useState("info");
@@ -44,6 +45,7 @@ export default function App() {
             <VideoPage 
               videoURL={videoURL}
               setVideoURL={(url) => (setVideoURL(url))}
+              snackbar={(m, s) => (spawnSnackbar(m, s))}
             />
           }
         />
@@ -52,6 +54,7 @@ export default function App() {
             <VideoPage 
               videoURL={videoURL}
               setVideoURL={(url) => (setVideoURL(url))}
+              snackbar={(m, s) => (spawnSnackbar(m, s))}
             />
           }
         />
@@ -60,6 +63,7 @@ export default function App() {
             <LogPage 
               logURL={logURL} 
               setLogURL={(url) => (setLogURL(url))}
+              snackbar={(m, s) => (spawnSnackbar(m, s))}
             />
           }
         />

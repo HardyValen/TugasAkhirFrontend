@@ -9,7 +9,7 @@ const APP_CONSTANTS = {
       name: "video" 
     },
     {
-      url: "http://localhost:9999/logs",
+      url: "http://localhost:9999/log",
       name: "log"
     }
   ],

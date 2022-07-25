@@ -165,7 +165,14 @@ export default function Layout(props) {
           </Grid>
         </Toolbar>
         <Divider/>
-        <Box sx={{ px:{xs: 2, sm: 3, md: 5}, py:3 }}>
+        <Box sx={{ 
+          px: {
+            xs: 2, 
+            sm: 3, 
+            md: 5
+          }, 
+          py:3
+        }}>
           {props.children}
         </Box>
       </Box>

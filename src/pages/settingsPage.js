@@ -1,4 +1,4 @@
-import { Button, Grid, TextField, Typography } from "@mui/material";
+import { Button, Grid, List, ListItem, ListItemText, TextField, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useState } from "react";
 
@@ -42,12 +42,24 @@ function SettingsPage(props) {
         </Box>
       </Grid>
       <Grid item xs={12} sm={3} md={4}>
-        <Box mb={4} sx={{mt: { xs:6, sm:0 } }}>
-          <Typography variant="h6">System Values</Typography>
-        </Box>
-        <Box>
-          <Typography variant="body2"><b>Video URL: </b>{props.videoURL}</Typography>
-          <Typography variant="body2"><b>Log URL: </b>{props.logURL}</Typography>
+        <Box sx={{mt: { xs:6, sm:0 } }}>
+          <List dense>
+            <ListItem>
+              <ListItemText><Typography variant="h6">System Values</Typography></ListItemText>
+            </ListItem>
+            <ListItem>
+              <ListItemText>
+                <b>Video URL:</b> {props.videoURL}
+              </ListItemText>
+            </ListItem>
+            <ListItem>
+              <ListItemText>
+                <b>Log URL:</b> {props.logURL}
+              </ListItemText>
+            </ListItem>
+          </List>
+          {/* <Typography variant="body2"><b>Video URL: </b>{props.videoURL}</Typography> */}
+          {/* <Typography variant="body2"><b>Log URL: </b>{props.logURL}</Typography> */}
         </Box>
       </Grid>
     </Grid>
