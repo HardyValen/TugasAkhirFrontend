@@ -3,7 +3,7 @@
 
 import { Grid } from "@mui/material";
 import { Box } from "@mui/system";
-import VODResults from "../common/faker/vodResults";
+import VODResultsFaker from "../common/faker/vodResults";
 import VideoList from "./videoList";
 import VideoPlayer from "./videoPlayer";
 
@@ -87,7 +87,7 @@ function VideoPage(props) {
         <VideoPlayer id={videoID} serverURL={props.serverURL}/>
       </Grid>
       <Grid item xs={12} sm={12} md={4}>
-        <VideoList videos={VODResults} clickHandler={(data) => {
+        <VideoList videos={VODResultsFaker} clickHandler={(data) => {
           return function (e) {
             e.preventDefault();
             setVideoID(data)

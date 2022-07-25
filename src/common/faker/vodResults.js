@@ -1,4 +1,4 @@
-const VODResults = [
+const VODResultsFaker = [
   {
       "videoStatus": {
           "code": 2000,
@@ -151,4 +151,4 @@ const VODResults = [
   }
 ]
 
-export default VODResults;
+export default VODResultsFaker;

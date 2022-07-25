@@ -1,10 +1,21 @@
-import { Grid, Typography } from "@mui/material"
+import { Autocomplete, Button, Chip, FormControl, Grid, InputLabel, List, ListItem, ListItemText, MenuItem, Select, TextField, Typography } from "@mui/material"
 import { Box } from "@mui/system"
+import { useState } from "react"
+import serverIDsFaker from "../common/faker/serverIDs"
+import theme from "../theme";
 
-function LogPage() {
+function LogPage(props) {
+  const [instance, setInstance] = useState(null);
+  const [qty, setQty] = useState(null);
+  const [order, setOrder] = useState(null);
+  const [type, setType] = useState(null);
+  const [validation, setValidation] = useState(false);
+
+  
+
   return (
-    <Grid container spacing={3}>
-      <Grid item xs={12} sm={8} md={8}>
+    <Grid container columnSpacing={2}>
+      <Grid item xs={12} sm={8} >
         <Box component="code" sx={{
           maxHeight: {
             xs: "60vh",
@@ -41,6 +52,91 @@ function LogPage() {
 
           Maecenas porttitor facilisis nibh quis dignissim. Suspendisse potenti. Sed eu ornare nunc. Morbi tincidunt eu dui et vestibulum. Nullam vestibulum viverra sapien ut varius. Vivamus arcu mauris, hendrerit a faucibus a, elementum eu nulla. Curabitur maximus ut ante eu maximus. Ut malesuada metus tempus massa auctor cursus. Morbi non lacus mi. Interdum et malesuada fames ac ante ipsum primis in faucibus. Duis pellentesque sodales orci a rutrum. Proin aliquet mi ullamcorper dolor blandit, suscipit porta felis condimentum.
         </Box>
+      </Grid>
+      <Grid item xs={12} sm={4}>
+        <Grid container rowSpacing={3}>
+          <Grid item xs={12}>
+            <List>
+              <ListItem>
+                <Grid container columnSpacing={1}>
+                  <Grid item xs={8}>
+                    <FormControl fullwidth sx={{width:"100%"}}>
+                      <InputLabel id="select-servers-label">Select Instance</InputLabel>
+                      <Select
+                        labelId="select-servers-label"
+                        id="select-servers-elmt"
+                        value={instance}
+                        label="Select Instance"
+                        onChange={e => {setInstance(e.target.value)}}
+                      >
+                        {serverIDsFaker.map((e, i) => (
+                          <MenuItem value={e.name} key={i}>{e.name}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Box>
+                      <FormControl fullwidth sx={{width:"100%"}}>
+                        <InputLabel id="select-quantity-label">Qty</InputLabel>
+                        <Select
+                          labelId="select-quantity-label"
+                          id="select-quantity-elmt"
+                          value={qty}
+                          label="Qty"
+                          onChange={e => {setQty(e.target.value)}}
+                        >
+                          {[10, 25, 50, 75, 100].map((e, i) => (
+                            <MenuItem value={e} key={i}>{e}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </ListItem>
+
+              <ListItem
+                secondaryAction={
+                  ["http", "common"].map((e, i) => (
+                    <Chip 
+                      sx={
+                        e == type ? {mx:0.5, fontWeight: 600, border: `3px solid ${theme.palette.primary.light}`, color: theme.palette.primary.light}
+                        : {mx:0.5}
+                      }
+                      key={i} variant="outlined" label={e} onClick={() => {setType(e)}}/>
+                  ))
+                }
+              >
+                <ListItemText>Log type:</ListItemText>
+              </ListItem>
+              <ListItem
+                secondaryAction={
+                  ["desc", "asc"].map((e, i) => (
+                    <Chip 
+                      sx={
+                        e == order ? {mx:0.5, fontWeight: 600, border: `3px solid ${theme.palette.primary.light}`, color: theme.palette.primary.light}
+                        : {mx:0.5}
+                      }
+                      key={i} variant="outlined" label={e} onClick={() => {setOrder(e)}}/>
+                  ))
+                }
+              >
+                <ListItemText>Sort by</ListItemText>
+              </ListItem>
+              <ListItem sx={{mt: 2}}>
+                <Button variant="contained" fullWidth
+                  // disabled={}
+                >
+                  fetch logs
+                </Button>
+              </ListItem>
+            </List>
+          </Grid>
+          <Grid item xs={12}>
+            {`${[instance, qty, order, type].indexOf(null) !== -1}`}
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
   )
