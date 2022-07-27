@@ -8,13 +8,17 @@ import { getAPIFromName } from "./constants/APP_FUNCTIONS";
 import { Alert, IconButton, Snackbar } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import APP_CONSTANTS from "./constants/APP_CONSTANTS";
+import UploadVideoPage from "./pages/uploadVideoPage";
+import EditVideoPage from "./pages/editVideoPage";
 
 export default function App() {
   const [videoURL, setVideoURL] = useState(getAPIFromName(APP_CONSTANTS.backend, "video"));
   const [logURL, setLogURL] = useState(getAPIFromName(APP_CONSTANTS.backend, "log"));
+  const [uploadURL, setUploadURL] = useState(getAPIFromName(APP_CONSTANTS.backend, "upload"));
   const [snackMessage, setSnackMessage] = useState("");
   const [snackState, setSnackState] = useState(false);
   const [snackSeverity, setSnackSeverity] = useState("info");
+  const [drawerState, setDrawerState] = useState(false);
 
   function handleClose (e, r) {
     setSnackState(false)
@@ -38,7 +42,7 @@ export default function App() {
   )
 
   return (
-    <Layout>
+    <Layout drawerState={drawerState} setDrawerState={(data) => (setDrawerState(data))}>
       <Routes>
         <Route exact path="/" 
           element={
@@ -46,6 +50,7 @@ export default function App() {
               videoURL={videoURL}
               setVideoURL={(url) => (setVideoURL(url))}
               snackbar={(m, s) => (spawnSnackbar(m, s))}
+              setDrawerState={(data) => (setDrawerState(data))}
             />
           }
         />
@@ -55,6 +60,7 @@ export default function App() {
               videoURL={videoURL}
               setVideoURL={(url) => (setVideoURL(url))}
               snackbar={(m, s) => (spawnSnackbar(m, s))}
+              setDrawerState={(data) => (setDrawerState(data))}
             />
           }
         />
@@ -64,6 +70,7 @@ export default function App() {
               logURL={logURL} 
               setLogURL={(url) => (setLogURL(url))}
               snackbar={(m, s) => (spawnSnackbar(m, s))}
+              setDrawerState={(data) => (setDrawerState(data))}
             />
           }
         />
@@ -74,7 +81,32 @@ export default function App() {
               setVideoURL={(url) => (setVideoURL(url))}
               logURL={logURL} 
               setLogURL={(url) => (setLogURL(url))}
+              uploadURL={uploadURL} 
+              setUploadURL={(url) => (setUploadURL(url))}
               snackbar={(m, s) => (spawnSnackbar(m, s))}
+              setDrawerState={(data) => (setDrawerState(data))}
+            />
+          }
+        />
+        <Route exact path="/upload" 
+          element={
+            <UploadVideoPage
+              videoURL={videoURL}
+              uploadURL={uploadURL}
+              setUploadURL={(url) => (setUploadURL(url))}
+              setVideoURL={(url) => (setVideoURL(url))}
+              snackbar={(m, s) => (spawnSnackbar(m, s))}
+              setDrawerState={(data) => (setDrawerState(data))}
+            />
+          }
+        />
+        <Route exact path="/edit" 
+          element={
+            <EditVideoPage
+              videoURL={videoURL}
+              setVideoURL={(url) => (setVideoURL(url))}
+              snackbar={(m, s) => (spawnSnackbar(m, s))}
+              setDrawerState={(data) => (setDrawerState(data))}
             />
           }
         />

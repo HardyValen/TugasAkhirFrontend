@@ -1,20 +1,38 @@
-import { Divider, Drawer, Grid, IconButton, InputAdornment, List, ListItem, ListItemIcon, ListItemText, SwipeableDrawer, TextField, Toolbar, Typography } from "@mui/material";
+import { Divider, Drawer, List, ListItem, ListItemIcon, ListItemText, SwipeableDrawer, Toolbar, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import MenuIcon from '@mui/icons-material/Menu';
 import APP_CONSTANTS from "../constants/APP_CONSTANTS";
 import logo from "../logo/dash.png";
 import theme from "../theme";
-import { Search } from "@mui/icons-material";
+
+function drawerListItem(data, index) {
+  return (
+    <ListItem button key={index} component={NavLink} to={data.url}
+      sx={{
+        "&.active": {
+          "& .drawer-list-text": {
+            color: theme.palette.primary.main,
+            fontWeight: "bolder"
+          },
+
+          "& .drawer-list-icon": {
+            color: theme.palette.primary.main,
+          }
+        },
+      }}
+    >
+      <ListItemIcon>
+        {data.icon}
+      </ListItemIcon>
+      <ListItemText>
+        <Typography variant="body2" className="drawer-list-text">{data.displayName}</Typography>
+      </ListItemText>
+    </ListItem>
+  )
+}
 
 export default function Layout(props) {
-  const [drawerState, setDrawerState] = useState(false);
-  const [search, setSearch] = useState("");
-  
-  const toggleDrawer = (open) => (e) => {
-    setDrawerState(open);
-  }
+  // const [search, setSearch] = useState("");
 
   const drawer = (
     <Box sx={{
@@ -28,31 +46,13 @@ export default function Layout(props) {
         <Toolbar>
           <Box component="img" src={logo} alt="DASH" sx={{ maxHeight: "32px" }}/>
         </Toolbar>
-        <Box sx={{overflow: "auto" }}>
+        <Box sx={{ overflow: "auto" }}>
           <List>
-            {APP_CONSTANTS.frontend.map((data, index) => (
-              <ListItem button key={index} component={NavLink} to={data.url}
-                sx={{
-                  "&.active": {
-                    "& .drawer-list-text": {
-                      color: theme.palette.primary.main,
-                      fontWeight: "bolder"
-                    },
-
-                    "& .drawer-list-icon": {
-                      color: theme.palette.primary.main,
-                    }
-                  },
-                }}
-              >
-                <ListItemIcon>
-                  {data.icon}
-                </ListItemIcon>
-                <ListItemText>
-                  <Typography variant="body2" className="drawer-list-text">{data.displayName}</Typography>
-                </ListItemText>
-              </ListItem>
-            ))}
+            {APP_CONSTANTS.frontend.main.map((data, index) => (drawerListItem(data, index)))}
+          </List>
+          <Divider/>
+          <List>
+            {APP_CONSTANTS.frontend.settings.map((data, index) => (drawerListItem(data, index)))}
           </List>
         </Box>
       </Box>
@@ -96,9 +96,9 @@ export default function Layout(props) {
             pb: 2,
           }}
           anchor="left"
-          open={drawerState}
-          onClose={toggleDrawer(false)}
-          onOpen={toggleDrawer(true)}
+          open={props.drawerState}
+          onClose={() => {props.setDrawerState(false)}}
+          onOpen={() => {props.setDrawerState(true)}}
       >
         {drawer}
       </SwipeableDrawer>
@@ -109,72 +109,7 @@ export default function Layout(props) {
         width: "100%",
         height: "100%",
       }}>
-        <Toolbar>
-          <Grid container>
-            <Grid item xs={2} sm={3}>
-              <Box sx={{
-                display: {
-                  xs: "flex",
-                  sm: "flex",
-                  md: "none"
-                },
-                alignItems: "center",
-              }}>
-                <IconButton edge="start" aria-label="menu" onClick={toggleDrawer(true)}>
-                  <MenuIcon/>
-                </IconButton>
-                <Box component="img" src={logo} alt="DASH" sx={{ 
-                  maxHeight: "32px", 
-                  ml: 2,
-                  display: {
-                    xs: "none",
-                    sm: "block",
-                    md: "none"
-                  }
-                }}/>
-              </Box>
-            </Grid>
-            <Grid item xs={10} sm={9} md={6}>
-              <Box sx={{
-                display: "flex",
-                alignItems: "center",
-                height: "100%",
-              }}>
-                <TextField type="text" size="small" placeholder="Search video..." fullWidth 
-                  onChange={(e) => {
-                    e.preventDefault();
-                    setSearch(e.target.value);
-                  }}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">
-                      <IconButton
-                        aria-label="search video"
-                        edge="end"
-                        onClick={() => {
-                          // TO DO: BIKIN API CALL
-                          console.log(search)
-                        }}
-                      >
-                      <Search/>
-                      </IconButton>
-                    </InputAdornment>
-                  }}
-                /> 
-              </Box>
-            </Grid>
-          </Grid>
-        </Toolbar>
-        <Divider/>
-        <Box sx={{ 
-          px: {
-            xs: 2, 
-            sm: 3, 
-            md: 5
-          }, 
-          py:3
-        }}>
-          {props.children}
-        </Box>
+        {props.children}
       </Box>
     </Box>
   )
