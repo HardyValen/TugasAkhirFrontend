@@ -153,11 +153,10 @@ function VideoPage(props) {
           </Grid>
           <Grid item xs={12} sm={12} md={4}>
             <VideoList videos={videoList} clickHandler={(data) => {
-                return function (e) {
-                  e.preventDefault();
-                  setVideo(data);
-                }
-              }}
+              return function (e) {
+                e.preventDefault();
+                setVideo(data);
+              }}}
               vodFetchRunning={vodFetchRunning}
             />
           </Grid>
