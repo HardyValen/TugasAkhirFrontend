@@ -8,7 +8,7 @@ function VideoList(props) {
       <List sx={{py: 0}}>
         {
           props.videos?.length > 0
-          ? props.videos.map((data, index) => (
+          ? props.videos?.map((data, index) => (
               <Fragment key={index}>
                 <ListItem button disabled={props.vodFetchRunning} onClick={props.clickHandler(data)}>
                   <ListItemText>

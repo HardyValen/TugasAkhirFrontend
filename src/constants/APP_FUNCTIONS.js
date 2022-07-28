@@ -1,6 +1,6 @@
 
 export function getObjectByKeyFromArray(array, key, value) {
-  let i = array.map((o) => (o[key])).indexOf(value);
+  let i = array?.map((o) => (o[key])).indexOf(value);
   return array[i];
 }
 

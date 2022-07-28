@@ -1,13 +1,14 @@
-import { Grid, Typography, TextField, Button } from "@mui/material";
+import { Grid, Typography, TextField, Button, LinearProgress } from "@mui/material";
 import { Box } from "@mui/system";
+import axios from "axios";
 import { useState } from "react";
-import postVodRequest from "../apiCalls/postVod";
 import LayoutToolbarWrapper from "../common/layoutToolbarWrapper";
 
 export default function UploadVideoPage(props) {
   const [file, setFile] = useState(null);
   const [videoTitle, setVideoTitle] = useState('');
   const [videoDescription, setVideoDescription] = useState('');
+  const [progress, setProgress] = useState(0);
   const [postRunning, setPostRunning] = useState(false);
 
   // const fileRef = useRef(null);
@@ -25,7 +26,6 @@ export default function UploadVideoPage(props) {
               // ref={fileRef}
               onChange={(e) => {
                 setFile(e.target.files[0])
-                console.log(e.target.files[0])
               }}
             />
             <Box mb={4}>
@@ -41,34 +41,39 @@ export default function UploadVideoPage(props) {
                 onChange={e => {setVideoDescription(e.target.value)}}
               />
             </Box>
-            <Box>
-              <Button variant="contained" color="primary" size="small" sx={{px:2, py:1}}
+            <Box sx={{display: "flex"}}>
+              <Button variant="contained" color="primary" size="small" sx={{flex:"0 0 auto", px:2, py:1, mr:4 }}
                 disabled={postRunning}
                 onClick={(e) => {
                   e.preventDefault();
                   const formData = new FormData();
                   formData.append('video', file);
-                  formData.append('videoTitle', videoTitle);
+                  formData.append('fieldname', videoTitle);
                   formData.append('videoDescription', videoDescription);
 
                   setPostRunning(true);
-                  postVodRequest(props.uploadURL, formData,
-                    (err, res) => {
-                      setPostRunning(false);
-                      if (err) {
-                        props.snackbar(`${res.data} (${res.status})`, "error")
-                      } else {
-                        props.snackbar(`${res.data}`, "success")
-                      }
-                    }
-                  )
-                  // axios.post()
+                  axios.post(props.uploadURL, formData, {
+                    onUploadProgress: progressEvent => setProgress( Math.round( (progressEvent.loaded * 100) / progressEvent.total) )
+                  })
+                  .then(res => {
+                    setPostRunning(false);
+                    props.snackbar(`${res.data}`, "success")
+                  })
+                  .catch(err => {
+                    setPostRunning(false);
+                    console.log(err);
+                    props.snackbar(`${err.message}`, "error")
+                  })
 
+                  // axios.post()
                   // props.snackbar("URL values successfully updated!", "success")
                 }}
               >
                 Upload video
               </Button>
+              <Box sx={{width: "100%", flex:"0 1 auto", display: "flex", alignItems: "center", opacity: (postRunning ? "1" : "0"), transition: "all 0.3s ease"}}>
+                {postRunning ? <LinearProgress sx={{width: "100%"}} variant="determinate" value={Math.round(progress)}/> : null}
+              </Box>
             </Box>
           </Grid>
         </Grid>

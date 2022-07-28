@@ -1,0 +1,7 @@
+services:
+  app:
+    container_name: frontend-prod-container
+    image: frontend-prod-image
+    build:
+      context: .
+      target: production
