@@ -1,7 +1,7 @@
 services:
   app:
     container_name: frontend-prod-container
-    image: frontend-prod-image
+    image: frontend-prod-image:22w30d6a
     build:
       context: .
       target: production

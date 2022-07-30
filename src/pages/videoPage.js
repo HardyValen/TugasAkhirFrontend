@@ -55,6 +55,7 @@ function VideoPage(props) {
       props.videoURL, { quantity: -1 },
       function (err, res) {
         if (err) {
+          setVideoList([]);
           props.snackbar("Unable to fetch videos", "error")
         } else {
           setVideoList(res.data);
