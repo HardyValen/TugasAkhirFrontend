@@ -5,9 +5,9 @@ export default function getVodManifestRequest(baseURL, {videoID, player, playerR
   let URL = `${baseURL}/?id=${videoID}`;
 
   try {
-    player.initialize(playerRef.current, URL, true);
-    cb(null)
+    // player.initialize(playerRef.current, URL, true);
+    cb(null, URL)
   } catch (e) {
-    cb(e)
+    cb(e, null)
   }
 }

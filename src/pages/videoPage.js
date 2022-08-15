@@ -7,7 +7,6 @@ import VideoList from "./videoList";
 // import dashjs from "dashjs";
 import { useEffect, useState, useRef } from "react";
 import getVodResultsRequest from "../apiCalls/getVodResults";
-import getVodManifestRequest from "../apiCalls/getVodManifest";
 import dashjs from "dashjs";
 import { Box } from "@mui/system";
 import moment from "moment";
@@ -18,13 +17,16 @@ function VideoPage(props) {
   const [video, setVideo] = useState(null);
   const [videoList, setVideoList] = useState([]);
   const [vodFetchRunning, setVodFetchRunning] = useState(false);
-
+  
   const [videoSearch, setVideoSearch] = useState("");
   const [videoSearchRunning, setVideoSearchRunning] = useState(false);
-
+  
   let playerRef = useRef(null);
   let player = dashjs.MediaPlayer().create();
+  let analytics = {}
 
+  player.initialize(playerRef.current);
+  
   player.updateSettings({
     debug: {
       logLevel: dashjs.Debug.LOG_LEVEL_NONE
@@ -43,12 +45,49 @@ function VideoPage(props) {
           abandonRequestsRule: false
         },
         autoSwitchBitrate: {
-          video: false,
-          audio: false
+          video: true,
+          audio: true
         }
       }
     }
   })
+
+  // player.on("playbackTimeUpdated", () => {
+  //   let dashMetrics = player.getDashMetrics();
+  //   let dashAdapter = player.getDashAdapter();
+  //   let streamInfo = player.getActiveStream().getStreamInfo();
+
+  //   let bufferLevel = {
+  //     video: dashMetrics.getCurrentBufferLevel("video"),
+  //     audio: dashMetrics.getCurrentBufferLevel("audio")
+  //   }
+
+  //   let bufferState = {
+  //     video: dashMetrics.getCurrentBufferState("video"),
+  //     videoaudio: dashMetrics.getCurrentBufferState("audio"),
+  //   }
+
+  //   const analyticsObj = {
+  //     bufferLevel,
+  //     bufferState,
+  //     timestamp: Date.now(), 
+  //   }
+
+  //   analytics.playbackMetrics.push(analyticsObj);
+  //   console.log(analytics);
+  // })
+
+  // player.on("streamInitialized", (e) => {
+  //   analytics = {}
+  //   const analyticsObj = {
+  //     video,
+  //     initTimestamp: Date.now(),
+  //     playbackMetrics: []
+  //   }
+
+  //   analytics = analyticsObj;
+  //   console.log(analytics);
+  // })
 
   useEffect(() => {
     getVodResultsRequest(
@@ -67,19 +106,23 @@ function VideoPage(props) {
   useEffect(() => {
     if (video !== null) {
       setVodFetchRunning(true);
-      getVodManifestRequest(props.videoURL, 
-        {
-          videoID: video?._id,
-          player: player,
-          playerRef: playerRef
-        }, 
-        (err) => {
-          setVodFetchRunning(false)
-          if (err) {
-            props.snackbar("Unable to fetch requested video manifest file", "error")
-          }
-        }
-      )
+      try {
+        let URL = `${props.videoURL}/?id=${video?._id}`;
+        
+        player.attachSource(URL)
+        console.log(player.getSource())
+
+        player.off("playbackTimeUpdated")
+        player.on("playbackTimeUpdated", () => {
+          console.log("Event Fired")
+        })
+
+      } catch (error) {
+        console.log(error)
+        props.snackbar("Unable to fetch requested video manifest file", "error")
+      } finally {
+        setVodFetchRunning(false)
+      }
     }
   }, [video])
 
@@ -148,6 +191,19 @@ function VideoPage(props) {
                       {video.videoDescription}
                     </Typography>
                   </Box>
+                  <Box>
+                    <Typography variant="caption">
+                      {/* {player.on(dashjs.MediaPlayer.events["PLAYBACK_TIME_UPDATED"], (e) => {
+                        const metrics = player.getDashMetrics(); 
+                        console.log(player.getActiveStream().getStreamInfo())
+                      })} */}
+                      {/* {[1, 2, 3].map((e, i) => {
+                        return (
+                          <Typography key={i}>{e}</Typography>
+                        )
+                      })} */}
+                    </Typography>
+                  </Box>
                 </Box>
               : <></>
             }
@@ -156,6 +212,7 @@ function VideoPage(props) {
             <VideoList videos={videoList} clickHandler={(data) => {
               return function (e) {
                 e.preventDefault();
+                analytics = {};
                 setVideo(data);
               }}}
               vodFetchRunning={vodFetchRunning}

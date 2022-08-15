@@ -31,6 +31,32 @@ function drawerListItem(data, index) {
   )
 }
 
+function drawerListItemExternal(data, index) {
+  return (
+    <ListItem button key={index} component="a" href={data.url} target="_blank" noreferrer="true" noopener="true"
+      sx={{
+        "&.active": {
+          "& .drawer-list-text": {
+            color: theme.palette.primary.main,
+            fontWeight: "bolder"
+          },
+
+          "& .drawer-list-icon": {
+            color: theme.palette.primary.main,
+          }
+        },
+      }}
+    >
+      <ListItemIcon>
+        {data.icon}
+      </ListItemIcon>
+      <ListItemText>
+        <Typography variant="body2" className="drawer-list-text">{data.displayName}</Typography>
+      </ListItemText>
+    </ListItem>
+  )
+}
+
 export default function Layout(props) {
   // const [search, setSearch] = useState("");
 
@@ -53,6 +79,10 @@ export default function Layout(props) {
           <Divider/>
           <List>
             {APP_CONSTANTS.frontend.settings.map((data, index) => (drawerListItem(data, index)))}
+          </List>
+          <Divider/>
+          <List>
+            {APP_CONSTANTS.frontend.externalLinks.map((data, index) => (drawerListItemExternal(data, index)))}
           </List>
         </Box>
       </Box>
