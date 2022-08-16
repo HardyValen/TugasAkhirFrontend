@@ -50,6 +50,8 @@ export default function App() {
             <VideoPage 
               videoURL={videoURL}
               setVideoURL={(url) => (setVideoURL(url))}
+              analyticsURL={analyticsURL}
+              setAnalyticsURL={(url) => {setAnalyticsURL(url)}}
               snackbar={(m, s) => (spawnSnackbar(m, s))}
               setDrawerState={(data) => (setDrawerState(data))}
             />

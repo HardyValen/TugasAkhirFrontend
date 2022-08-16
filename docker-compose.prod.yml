@@ -1,7 +1,7 @@
 services:
   app:
     container_name: frontend-prod-container
-    image: frontend-prod-image:22w32d3a
+    image: hardyvalen/tugasakhir:frontend-22w33d2a
     build:
       context: .
       target: production

@@ -1,8 +1,9 @@
 // // import logo from './logo.svg';
 // // import './App.css';
 
-import { Button, Grid, IconButton, InputAdornment, TextField, Typography } from "@mui/material";
+import { Button, Grid, IconButton, InputAdornment, LinearProgress, TextField, Typography } from "@mui/material";
 import VideoList from "./videoList";
+// import FakerDataJSON from "../common/faker/formDataFaker.json";
 
 // import dashjs from "dashjs";
 import { useEffect, useState, useRef } from "react";
@@ -24,6 +25,8 @@ function VideoPage(props) {
   const [videoSearchRunning, setVideoSearchRunning] = useState(false);
 
   const [postAnalyticsRunning, setPostAnalyticsRunning] = useState(false);
+  const [postAnalyticsRequestRunning, setPostAnalyticsRequestRunning] = useState(false);
+  const [postAnalyticsProgress, setPostAnalyticsProgress] = useState(0)
   
   const [player, setPlayer] = useState(dashjs.MediaPlayer().create());
   const [analyticsState, setAnalyticsState] = useState({})
@@ -240,15 +243,19 @@ function VideoPage(props) {
                       {video.videoDescription}
                     </Typography>
                   </Box>
-                  <Box sx={{mt: 2}}>
-                    <Button variant="contained" color="primary" size="small" sx={{px:2, py:1}} 
-                      disabled={postAnalyticsRunning}
+                  <Box sx={{mt: 2, display: "flex"}}>
+                    <Button variant="contained" color="primary" size="small" sx={{px:3, py:1}} 
+                      disabled={postAnalyticsRunning || postAnalyticsRequestRunning}
                       onClick={(e) => {
                         e.preventDefault();
-                        let formData = analyticsState;
+                        
+                        const formData = new FormData();
+                        formData.append('analytics', analyticsState);
 
-                        setPostAnalyticsRunning(true);
-                        postAnalyticsRequest(props.analyticsURL, formData, function(err, res) {
+                        setPostAnalyticsRequestRunning(true);
+                        postAnalyticsRequest(props.analyticsURL, formData, 
+                        { onUploadProgress: e => setPostAnalyticsProgress( Math.round((e.loaded * 100) / e.total).toFixed(2) )},
+                        function(err, res) {
                           if (err) {
                             props.snackbar(err.message, "error")
                             console.log(err)
@@ -256,12 +263,23 @@ function VideoPage(props) {
                             props.snackbar("Analytics sent successfully!", "success")
                           }
                           console.log(analyticsState);
-                          setPostAnalyticsRunning(false);
+                          setPostAnalyticsRequestRunning(false);
+                          setPostAnalyticsProgress(0);
                         })
                       }}
                     >
-                      Send Analytics
+                      Send&nbsp;Analytics
                     </Button>
+                        <Box sx={{width: "100%", display: "flex", ml: 4, alignItems: "center", opacity: (postAnalyticsRequestRunning ? "1" : "0"), transition: "all 0.3s ease"}}>
+                          {(postAnalyticsRequestRunning) ? 
+                            <>
+                              <LinearProgress sx={{width: "100%", maxWidth: "200px", mr: 2}} variant="determinate" value={Math.round(postAnalyticsProgress)}/>
+                              <Typography variant="caption">
+                                {`${postAnalyticsProgress}%`}
+                              </Typography>
+                            </>
+                          : null}
+                        </Box>
                   </Box>
                 </Box>
               : <></>
@@ -277,6 +295,29 @@ function VideoPage(props) {
             />
           </Grid>
         </Grid>
+      </Box>
+      <Box>
+        {/* <Button onClick={e => {
+          e.preventDefault();
+          // const formData = new FormData();
+          // formData.append('analytics', {});
+          // console.log(formData.getAll("analytics"))
+
+          props.snackbar("Please wait..", "info")
+          postAnalyticsRequest(props.analyticsURL, {
+            analytics: FakerDataJSON
+          }, function(err, res) {
+            if (err) {
+              props.snackbar(err.message, "error")
+              console.log(err)
+            } else {
+              props.snackbar("Analytics sent successfully!", "success")
+              console.log(res)
+            }
+          })
+        }}>
+          Test Data
+        </Button> */}
       </Box>
     </Box>
   )

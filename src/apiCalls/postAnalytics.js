@@ -1,8 +1,8 @@
 import axios from "axios";
 
-export default function postAnalyticsRequest(baseURL, formData, cb) {
-  console.log(formData)
-  axios.put(baseURL, formData)
+export default function postAnalyticsRequest(baseURL, formData, settings, cb) {
+  console.log(baseURL)
+  axios.post(baseURL, formData, settings)
   .then(res => {
     cb(null, res)
   })
