@@ -249,11 +249,10 @@ function VideoPage(props) {
                       onClick={(e) => {
                         e.preventDefault();
                         
-                        const formData = new FormData();
-                        formData.append('analytics', analyticsState);
-
                         setPostAnalyticsRequestRunning(true);
-                        postAnalyticsRequest(props.analyticsURL, formData, 
+                        postAnalyticsRequest(props.analyticsURL, {
+                          analytics: analyticsState
+                        }, 
                         { onUploadProgress: e => setPostAnalyticsProgress( Math.round((e.loaded * 100) / e.total).toFixed(2) )},
                         function(err, res) {
                           if (err) {
