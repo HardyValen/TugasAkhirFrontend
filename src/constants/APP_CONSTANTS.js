@@ -24,8 +24,8 @@ const APP_CONSTANTS = {
       name: "upload"
     },
     {
-      url: "http://167.205.57.241/analytics",
-      // url: "http://localhost:9999/analytics",
+      // url: "http://167.205.57.241/analytics",
+      url: "http://localhost:9999/analytics",
       name: "analytics"
     }
   ],

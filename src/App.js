@@ -15,6 +15,7 @@ export default function App() {
   const [videoURL, setVideoURL] = useState(getAPIFromName(APP_CONSTANTS.backend, "video"));
   const [logURL, setLogURL] = useState(getAPIFromName(APP_CONSTANTS.backend, "log"));
   const [uploadURL, setUploadURL] = useState(getAPIFromName(APP_CONSTANTS.backend, "upload"));
+  const [analyticsURL, setAnalyticsURL] = useState(getAPIFromName(APP_CONSTANTS.backend, "analytics"))
   const [snackMessage, setSnackMessage] = useState("");
   const [snackState, setSnackState] = useState(false);
   const [snackSeverity, setSnackSeverity] = useState("info");
@@ -59,6 +60,8 @@ export default function App() {
             <VideoPage 
               videoURL={videoURL}
               setVideoURL={(url) => (setVideoURL(url))}
+              analyticsURL={analyticsURL}
+              setAnalyticsURL={(url) => {setAnalyticsURL(url)}}
               snackbar={(m, s) => (spawnSnackbar(m, s))}
               setDrawerState={(data) => (setDrawerState(data))}
             />
@@ -83,6 +86,8 @@ export default function App() {
               setLogURL={(url) => (setLogURL(url))}
               uploadURL={uploadURL} 
               setUploadURL={(url) => (setUploadURL(url))}
+              analyticsURL={analyticsURL}
+              setAnalyticsURL={(url) => {setAnalyticsURL(url)}}
               snackbar={(m, s) => (spawnSnackbar(m, s))}
               setDrawerState={(data) => (setDrawerState(data))}
             />

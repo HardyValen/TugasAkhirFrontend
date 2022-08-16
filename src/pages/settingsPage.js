@@ -7,6 +7,7 @@ function SettingsPage(props) {
   const [videoURL, setVideoURL] = useState(props.videoURL);
   const [logURL, setLogURL] = useState(props.logURL);
   const [uploadURL, setUploadURL] = useState(props.uploadURL);
+  const [analyticsURL, setAnalyticsURL] = useState(props.analyticsURL);
 
   return (
     <Box>
@@ -17,7 +18,7 @@ function SettingsPage(props) {
             <Box mb={4}>
               <Typography variant="h6">Settings</Typography>
             </Box>
-            <Box mb={4}>
+            <Box mb={3}>
               <TextField 
                 label="Set Video URL" type="text" size="small"
                 sx={{width: "100%"}} value={videoURL} 
@@ -41,6 +42,14 @@ function SettingsPage(props) {
                 onChange={e => {setUploadURL(e.target.value)}}
               />
             </Box>
+            <Box mb={3}>
+              <TextField 
+                label="Set Analytics URL" type="text" size="small"
+                sx={{width: "100%"}} value={analyticsURL} 
+                helperText="URL yang digunakan untuk mengirimkan data analytics."
+                onChange={e => {setAnalyticsURL(e.target.value)}}
+              />
+            </Box>
             <Box>
               <Button variant="contained" color="primary" size="small" sx={{px:2, py:1}}
                 onClick={(e) => {
@@ -48,6 +57,7 @@ function SettingsPage(props) {
                   props.setVideoURL(videoURL);
                   props.setLogURL(logURL);
                   props.setUploadURL(uploadURL);
+                  props.setAnalyticsURL(analyticsURL);
                   props.snackbar("URL values successfully updated!", "success")
                 }}
               >
@@ -74,6 +84,11 @@ function SettingsPage(props) {
                 <ListItem>
                   <ListItemText>
                     <b>Upload URL:</b> {props.uploadURL}
+                  </ListItemText>
+                </ListItem>
+                <ListItem>
+                  <ListItemText>
+                    <b>Analytics URL:</b> {props.analyticsURL}
                   </ListItemText>
                 </ListItem>
               </List>

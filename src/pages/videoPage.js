@@ -1,7 +1,7 @@
 // // import logo from './logo.svg';
 // // import './App.css';
 
-import { Grid, IconButton, InputAdornment, TextField, Typography } from "@mui/material";
+import { Button, Grid, IconButton, InputAdornment, TextField, Typography } from "@mui/material";
 import VideoList from "./videoList";
 
 // import dashjs from "dashjs";
@@ -12,22 +12,25 @@ import { Box } from "@mui/system";
 import moment from "moment";
 import LayoutToolbarWrapper from "../common/layoutToolbarWrapper";
 import { Search } from "@mui/icons-material";
+import postAnalyticsRequest from "../apiCalls/postAnalytics";
 
 function VideoPage(props) {
+  const [firstLoad, setFirstLoad] = useState(true);
   const [video, setVideo] = useState(null);
   const [videoList, setVideoList] = useState([]);
   const [vodFetchRunning, setVodFetchRunning] = useState(false);
   
   const [videoSearch, setVideoSearch] = useState("");
   const [videoSearchRunning, setVideoSearchRunning] = useState(false);
-  
-  let playerRef = useRef(null);
-  let player = dashjs.MediaPlayer().create();
-  let analytics = {}
 
-  player.initialize(playerRef.current);
+  const [postAnalyticsRunning, setPostAnalyticsRunning] = useState(false);
   
-  player.updateSettings({
+  const [player, setPlayer] = useState(dashjs.MediaPlayer().create());
+  const [analyticsState, setAnalyticsState] = useState({})
+  let analytics = {}
+  
+  const playerRef = useRef(null);
+  const playerSettings = {
     debug: {
       logLevel: dashjs.Debug.LOG_LEVEL_NONE
     },
@@ -40,9 +43,9 @@ function VideoPage(props) {
         ABRStrategy: 'abrThroughput',
         additionalAbrRules: {
           insufficientBufferRule: true,
-          switchHistoryRule: false,
-          droppedFramesRule: false,
-          abandonRequestsRule: false
+          switchHistoryRule: true,
+          droppedFramesRule: true,
+          abandonRequestsRule: true
         },
         autoSwitchBitrate: {
           video: true,
@@ -50,44 +53,7 @@ function VideoPage(props) {
         }
       }
     }
-  })
-
-  // player.on("playbackTimeUpdated", () => {
-  //   let dashMetrics = player.getDashMetrics();
-  //   let dashAdapter = player.getDashAdapter();
-  //   let streamInfo = player.getActiveStream().getStreamInfo();
-
-  //   let bufferLevel = {
-  //     video: dashMetrics.getCurrentBufferLevel("video"),
-  //     audio: dashMetrics.getCurrentBufferLevel("audio")
-  //   }
-
-  //   let bufferState = {
-  //     video: dashMetrics.getCurrentBufferState("video"),
-  //     videoaudio: dashMetrics.getCurrentBufferState("audio"),
-  //   }
-
-  //   const analyticsObj = {
-  //     bufferLevel,
-  //     bufferState,
-  //     timestamp: Date.now(), 
-  //   }
-
-  //   analytics.playbackMetrics.push(analyticsObj);
-  //   console.log(analytics);
-  // })
-
-  // player.on("streamInitialized", (e) => {
-  //   analytics = {}
-  //   const analyticsObj = {
-  //     video,
-  //     initTimestamp: Date.now(),
-  //     playbackMetrics: []
-  //   }
-
-  //   analytics = analyticsObj;
-  //   console.log(analytics);
-  // })
+  }
 
   useEffect(() => {
     getVodResultsRequest(
@@ -102,20 +68,103 @@ function VideoPage(props) {
       }
     )
   }, [])
+  
+  useEffect(() => {
+    // Listeners for Analytics
+    function playbackTimeUpdatedCb(e) {
+      let streamInfo = player.getActiveStream().getStreamInfo();
+      let dashMetrics = player.getDashMetrics();
+      let dashAdapter = player.getDashAdapter();
+      
+      if (dashMetrics && streamInfo) {
+        let playback = analytics.playback || [];
+        
+        const periodIdx = streamInfo.index;
+        let repSwitch = dashMetrics.getCurrentRepresentationSwitch("video", true);
+        let bitrate = repSwitch ? dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) : NaN;
+        let adaptation = dashAdapter.getAdaptationForType(periodIdx, "video", streamInfo);
+        let currentRep = adaptation.Representation_asArray.find(function (rep) {
+          return rep.id === repSwitch.to
+        })
+
+        let frameRate = currentRep.frameRate;
+        let resolution = `${currentRep.width} x ${currentRep.height}`;
+
+        playback.push({
+          time: e.time,
+          timeToEnd: e.timeToEnd,
+          timestamp: Date.now(),
+          bitrate,
+          frameRate,
+          resolution,
+          bufferStateVideo: dashMetrics.getCurrentBufferState("video"),
+          bufferStateAudio: dashMetrics.getCurrentBufferState("audio"),
+          bufferLevelVideo: dashMetrics.getCurrentBufferLevel("video"),
+          bufferLevelAudio: dashMetrics.getCurrentBufferLevel("audio"),
+        })
+
+        analytics = {
+          playback,
+          ...analytics
+        }
+
+        console.log(analytics)
+        setAnalyticsState(analytics);
+      }
+    }
+
+    function streamInitializedCb(e) {
+      analytics = {
+        video,
+        initTimestamp: Date.now(),
+        playback: [],
+        ...analytics
+      }
+
+      console.log(analytics);
+      setAnalyticsState(analytics);
+    }
+
+    function controlAnalyticsButton(state) {
+      return function (e) {
+        setPostAnalyticsRunning(state);
+      }
+    }
+
+    const playerListeners = {
+      "playbackTimeUpdated": playbackTimeUpdatedCb,
+      "streamInitialized": streamInitializedCb,
+      "playbackPaused": controlAnalyticsButton(false),
+      "playbackEnded": controlAnalyticsButton(false),
+      "playbackPlaying": controlAnalyticsButton(true), 
+    }
+  
+    // setAnalytics({});
+    Object.entries(playerListeners).forEach((o) => {
+      player.on(o[0], o[1])
+    })
+    return () => {
+      Object.entries(playerListeners).forEach((o) => {
+        player.off(o[0], o[1])
+      })
+    }
+  }, [video, player])
 
   useEffect(() => {
     if (video !== null) {
       setVodFetchRunning(true);
       try {
         let URL = `${props.videoURL}/?id=${video?._id}`;
-        
-        player.attachSource(URL)
-        console.log(player.getSource())
 
-        player.off("playbackTimeUpdated")
-        player.on("playbackTimeUpdated", () => {
-          console.log("Event Fired")
-        })
+        if (!firstLoad) {
+          console.log("[PLAYER] Source updated")
+          player.attachSource(URL); 
+        } else {
+          player.initialize(playerRef.current, URL, true);
+          player.updateSettings(playerSettings);
+          console.log("[PLAYER] Media Player Initialized");
+          setFirstLoad(false);
+        }
 
       } catch (error) {
         console.log(error)
@@ -124,7 +173,7 @@ function VideoPage(props) {
         setVodFetchRunning(false)
       }
     }
-  }, [video])
+  }, [video, player])
 
   return (
     <Box>
@@ -191,18 +240,28 @@ function VideoPage(props) {
                       {video.videoDescription}
                     </Typography>
                   </Box>
-                  <Box>
-                    <Typography variant="caption">
-                      {/* {player.on(dashjs.MediaPlayer.events["PLAYBACK_TIME_UPDATED"], (e) => {
-                        const metrics = player.getDashMetrics(); 
-                        console.log(player.getActiveStream().getStreamInfo())
-                      })} */}
-                      {/* {[1, 2, 3].map((e, i) => {
-                        return (
-                          <Typography key={i}>{e}</Typography>
-                        )
-                      })} */}
-                    </Typography>
+                  <Box sx={{mt: 2}}>
+                    <Button variant="contained" color="primary" size="small" sx={{px:2, py:1}} 
+                      disabled={postAnalyticsRunning}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        let formData = analyticsState;
+
+                        setPostAnalyticsRunning(true);
+                        postAnalyticsRequest(props.analyticsURL, formData, function(err, res) {
+                          if (err) {
+                            props.snackbar(err.message, "error")
+                            console.log(err)
+                          } else {
+                            props.snackbar("Analytics sent successfully!", "success")
+                          }
+                          console.log(analyticsState);
+                          setPostAnalyticsRunning(false);
+                        })
+                      }}
+                    >
+                      Send Analytics
+                    </Button>
                   </Box>
                 </Box>
               : <></>
@@ -212,7 +271,6 @@ function VideoPage(props) {
             <VideoList videos={videoList} clickHandler={(data) => {
               return function (e) {
                 e.preventDefault();
-                analytics = {};
                 setVideo(data);
               }}}
               vodFetchRunning={vodFetchRunning}
