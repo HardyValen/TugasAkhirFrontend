@@ -12,7 +12,7 @@ import dashjs from "dashjs";
 import { Box } from "@mui/system";
 import moment from "moment";
 import LayoutToolbarWrapper from "../common/layoutToolbarWrapper";
-import { Search } from "@mui/icons-material";
+import { ContentCopy, Search } from "@mui/icons-material";
 import postAnalyticsRequest from "../apiCalls/postAnalytics";
 
 function VideoPage(props) {
@@ -29,7 +29,9 @@ function VideoPage(props) {
   const [postAnalyticsProgress, setPostAnalyticsProgress] = useState(0)
   
   const [player, setPlayer] = useState(dashjs.MediaPlayer().create());
-  const [analyticsState, setAnalyticsState] = useState({})
+  const [analyticsState, setAnalyticsState] = useState({});
+  const [refID, setRefID] = useState("");
+
   let analytics = {}
   
   const playerRef = useRef(null);
@@ -259,7 +261,9 @@ function VideoPage(props) {
                             props.snackbar(err.message, "error")
                             console.log(err)
                           } else {
-                            props.snackbar("Analytics sent successfully!", "success")
+                            props.snackbar(res.data.message, "success")
+                            setRefID(res.data.id)
+                            console.log(res.data.message);
                           }
                           console.log(analyticsState);
                           setPostAnalyticsRequestRunning(false);
@@ -269,16 +273,28 @@ function VideoPage(props) {
                     >
                       Send&nbsp;Analytics
                     </Button>
-                        <Box sx={{width: "100%", display: "flex", ml: 4, alignItems: "center", opacity: (postAnalyticsRequestRunning ? "1" : "0"), transition: "all 0.3s ease"}}>
-                          {(postAnalyticsRequestRunning) ? 
-                            <>
-                              <LinearProgress sx={{width: "100%", maxWidth: "200px", mr: 2}} variant="determinate" value={Math.round(postAnalyticsProgress)}/>
-                              <Typography variant="caption">
-                                {`${postAnalyticsProgress}%`}
-                              </Typography>
-                            </>
-                          : null}
-                        </Box>
+                    <Box sx={{width: "100%", display: "flex", ml: 4, alignItems: "center", opacity: (postAnalyticsRequestRunning ? "1" : "0"), transition: "all 0.3s ease"}}>
+                      {(postAnalyticsRequestRunning) ? 
+                        <>
+                          <LinearProgress sx={{width: "100%", maxWidth: "200px", mr: 2}} variant="determinate" value={Math.round(postAnalyticsProgress)}/>
+                          <Typography variant="caption">
+                            {`${postAnalyticsProgress}%`}
+                          </Typography>
+                        </>
+                      : null}
+                    </Box>
+                  </Box>
+                  <Box sx={{mt: 2, display: refID ? "block" : "none"}}>
+                    <Button variant="text" sx={{textTransform: "none"}}
+                      startIcon={<ContentCopy/>}
+                      onClick={(e) => {
+                        navigator.clipboard.writeText(refID).then(() => {
+                          props.snackbar(`Copied ID: ${refID}`, "info")
+                        })
+                      }}
+                    >
+                      Analytics ID: {refID}
+                    </Button>
                   </Box>
                 </Box>
               : <></>
@@ -294,29 +310,6 @@ function VideoPage(props) {
             />
           </Grid>
         </Grid>
-      </Box>
-      <Box>
-        {/* <Button onClick={e => {
-          e.preventDefault();
-          // const formData = new FormData();
-          // formData.append('analytics', {});
-          // console.log(formData.getAll("analytics"))
-
-          props.snackbar("Please wait..", "info")
-          postAnalyticsRequest(props.analyticsURL, {
-            analytics: FakerDataJSON
-          }, function(err, res) {
-            if (err) {
-              props.snackbar(err.message, "error")
-              console.log(err)
-            } else {
-              props.snackbar("Analytics sent successfully!", "success")
-              console.log(res)
-            }
-          })
-        }}>
-          Test Data
-        </Button> */}
       </Box>
     </Box>
   )
